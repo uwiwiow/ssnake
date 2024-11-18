@@ -1,23 +1,18 @@
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
+
+
+#include "config.h"
+#include "globals.h"
+#include "input.h"
+#include "move.h"
+#include "utils.h"
+#include "bot.h"
+
 
 #define CVECTOR_LOGARITHMIC_GROWTH
 #include "cvector.h"
 
-
-void input(Vector2 *d);
-void move(Vector2 *snake, Vector2 d);
-Vector2 randVec2ScreenPos();
-void procmove(Vector2 *curr, Vector2 prev, float dist);
-double getAngleRelSDF(Vector2 s, Vector2 d, Vector2 f);
-void botmove(double a, Vector2 *d);
-
-
-const int width = 1920;
-const int height = 1080;
-float body = 10.0f;
-bool botmode = false;
 
 int main () {
 
@@ -102,58 +97,3 @@ int main () {
     return 0;
 }
 
-void input(Vector2 *d) {
-    if (IsKeyDown(KEY_A))
-        *d = Vector2Rotate(*d, -5 * GetFrameTime());
-
-    if (IsKeyDown(KEY_D))
-        *d = Vector2Rotate(*d, 5 * GetFrameTime());
-
-    if (IsKeyPressed(KEY_B))
-        botmode = !botmode;
-}
-
-void move(Vector2 *snake, Vector2 d) {
-    snake->x = snake->x + (d.x * (100 + body) * GetFrameTime());
-    snake->y = snake->y + (d.y * (100 + body) * GetFrameTime());
-}
-
-Vector2 randVec2ScreenPos() {
-    return (Vector2) {(float) GetRandomValue(20, width - 20),
-                      (float) GetRandomValue(20, height - 20)};
-}
-
-void procmove(Vector2 *curr, Vector2 prev, float dist) {
-
-    Vector2 direction = Vector2Subtract(*curr, prev);
-    if (Vector2Length(direction) != 0) {
-        direction = Vector2Normalize(direction);
-        direction = Vector2Scale(direction, dist);
-    }
-    *curr = Vector2Add(prev, direction);
-
-}
-
-double getAngleRelSDF(Vector2 s, Vector2 d, Vector2 f) {
-    Vector2 v = Vector2Subtract(f, s);
-
-    double magnitude_v = Vector2Length(v);
-    if (magnitude_v == 0) {
-        return 0;
-    }
-
-    double angle = acos(Vector2DotProduct(d, v) / magnitude_v);
-
-    if ((d.x * v.y - d.y * v.x) < 0) {
-        angle = -angle;
-    }
-
-    return angle * RAD2DEG;
-}
-
-void botmove(double a, Vector2 *d) {
-    if (a < -1.0f)
-        *d = Vector2Rotate(*d, -5 * GetFrameTime());
-    if (a > 1.0f)
-        *d = Vector2Rotate(*d, 5 * GetFrameTime());
-}
